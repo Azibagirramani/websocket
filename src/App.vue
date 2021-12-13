@@ -1,27 +1,158 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" />
+  <div>
+    <div
+      class="d-flex align-items-center justify-content-center bg-primary-1 vh-100"
+    >
+      <div class="">
+        <h1 class="text-center">
+          Your currently
+          <span
+            class="badge rounded-pill"
+            :class="status ? 'bg-primary' : 'bg-danger'"
+            >{{ status ? "Connected" : "Disconnected" }}</span
+          >
+        </h1>
+
+        <div
+          class="d-flex justify-content-end flex-column d-inline inline gap-2 w-25"
+        >
+          <button
+            class="btn btn-primary rounded-0 shadow border-0"
+            @click="startSocket"
+          >
+            Start
+          </button>
+          <button
+            class="btn btn-danger rounded-0 shadow border-0"
+            @click="closeSocket"
+          >
+            Stop
+          </button>
+        </div>
+
+        <div class="d-flex justify-content-end d-inline my-5">
+          <BaseSelect v-model="select" />
+        </div>
+
+        <div class="container fixed">
+          <div class="row g-2 mt-5 row-cols-3">
+            <div class="col" v-for="(items, index) in content" :key="index">
+              <div class="card border-0 shadow">
+                <div
+                  class="card-header d-flex justify-content-end border-0 bg-transparent"
+                >
+                  <Battery :percent="items.battery_status.percentage_level" />
+                </div>
+                <div class="card-body text-center">
+                  <span class="circle"> </span>
+
+                  <h5 class="mt-3">{{ items.name }}</h5>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import HelloWorld from "./components/HelloWorld.vue";
+import Battery from "./component/battery.vue";
+import BaseSelect from "./component/_select.vue";
 
+import SocketService, { vehicle as vehicleDto } from "./services/socketService";
 export default defineComponent({
   name: "App",
   components: {
-    HelloWorld,
+    Battery,
+    BaseSelect,
+  },
+  data() {
+    return {
+      select: "",
+      message: "Hello World",
+      status: false,
+      content: [] as vehicleDto[],
+    };
+  },
+
+  computed: {
+    stats() {
+      return SocketService.socket.readyState === 1 ? true : false;
+    },
+
+    computedContent() {
+      return this.makers.filter((item: vehicleDto) => {
+        return item.group.toLowerCase().includes(this.select.toLowerCase());
+      });
+    },
+  },
+
+  methods: {
+    startSocket() {
+      SocketService.sendData({ name: "vehicle/view/rentable/subscribe" });
+    },
+
+    closeSocket() {
+      SocketService.close();
+    },
+  },
+
+  mounted() {
+    SocketService.onMessage((data: any) => {
+      const val = JSON.parse(data.data);
+      this.content.push(...val.data);
+    });
+
+    SocketService.socket.onopen = () => {
+      this.status = true;
+    };
+
+    SocketService.socket.onclose = () => {
+      this.status = false;
+    };
+  },
+
+  beforeMount() {
+    SocketService.connect();
   },
 });
 </script>
 
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+<style lang="scss" scoped>
+.fixed {
+  width: 200rem !important;
+  height: 30rem;
+  border: 0.5px solid #ccc;
+  position: relative;
+  overflow: scroll;
+  overflow-x: hidden;
+}
+
+.bg-primary-1 {
+  background-color: #f6f6f6;
+}
+
+.card {
+  margin: 1rem;
+  transition: 0.5s ease-in-out;
+  cursor: pointer;
+  &:hover {
+    transform: translateY(-0.5rem);
+  }
+}
+
+.circle {
+  min-width: 5rem;
+  min-height: 5rem;
+  border-radius: 50%;
+  border: 2px solid red;
+  display: inline-block;
+}
+
+h5 {
+  color: #818385;
 }
 </style>
