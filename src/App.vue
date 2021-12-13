@@ -36,7 +36,11 @@
 
         <div class="container fixed">
           <div class="row g-2 mt-5 row-cols-3">
-            <div class="col" v-for="(items, index) in content" :key="index">
+            <div
+              class="col"
+              v-for="(items, index) in computedData"
+              :key="index"
+            >
               <div class="card border-0 shadow">
                 <div
                   class="card-header d-flex justify-content-end border-0 bg-transparent"
@@ -71,26 +75,33 @@ export default defineComponent({
   },
   data() {
     return {
-      select: "",
-      message: "Hello World",
-      status: false,
+      select: "" as string,
+      message: "Hello World" as string,
+      status: false as boolean,
       content: [] as vehicleDto[],
     };
   },
 
   computed: {
-    stats() {
-      return SocketService.socket.readyState === 1 ? true : false;
-    },
-
-    computedContent() {
-      return this.makers.filter((item: vehicleDto) => {
-        return item.group.toLowerCase().includes(this.select.toLowerCase());
-      });
+    // searhc for the vehicle
+    computedData() {
+      const data = this.content as vehicleDto[];
+      const search = this.select as string;
+      if (search) {
+        return data.filter((item) => item.name.includes(search));
+      }
+      return data;
     },
   },
 
   methods: {
+    // filter the data
+    filterData(data: vehicleDto[]) {
+      return data.filter((item) => {
+        return item.name.toLowerCase().includes(this.select.toLowerCase());
+      });
+    },
+
     startSocket() {
       SocketService.sendData({ name: "vehicle/view/rentable/subscribe" });
     },
