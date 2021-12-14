@@ -15,13 +15,6 @@
 
         <div class="d-flex justify-content-end gap-4">
           <button
-            class="btn btn-primary rounded-0 shadow border-0"
-            @click="startSocket"
-            :disabled="!status"
-          >
-            Show cars
-          </button>
-           <button
             class="btn btn-danger rounded-0 shadow border-0"
             @click="stopSocket"
             :disabled="!status"
@@ -108,12 +101,26 @@ export default defineComponent({
         this.select = "";
       }
     },
+
+    status: {
+      handler(value: boolean) {
+        if (value) {
+          this.startSocket();
+        } else {
+          this.stopSocket();
+        }
+      },
+    },
   },
 
   mounted() {
     SocketService.onMessage((data: any) => {
       const val = JSON.parse(data.data);
-      this.content.push(...val.data);
+
+      // ignore if vehicle is null
+      if (val.data) {
+        this.content.push(...val.data);
+      }
     });
 
     SocketService.socket.onopen = () => {
@@ -127,6 +134,10 @@ export default defineComponent({
 
   beforeMount() {
     SocketService.connect();
+  },
+
+  beforeUnmount() {
+    SocketService.close();
   },
 });
 </script>
