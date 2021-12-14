@@ -146,7 +146,7 @@ export default defineComponent({
 .fixed {
   width: 200rem !important;
   height: 30rem;
-  border: 0.5px solid #ccc;
+  border: none;
   position: relative;
   overflow: scroll;
   overflow-x: hidden;
