@@ -42,18 +42,20 @@ class SocketService {
   }
 
   // convert data json.stringify
-  public sendData(data: any): void {
+  public sendData(data: any = {}): void {
     try {
       this.socket.send(JSON.stringify(data));
+      return;
     } catch (e) {
       console.log(e);
     }
   }
 
   // subscribe to event
-  public onMessage(callback: any) {
+  public onMessage(callback: any): void {
     try {
       this.socket.onmessage = callback;
+      return;
     } catch (e) {
       console.log(e);
     }
@@ -71,7 +73,6 @@ class SocketService {
     callback(state);
   }
 
-  // reconnect
   public onError(callback: any): void {
     this.socket.onerror = () => {
       callback();
@@ -82,6 +83,7 @@ class SocketService {
   public close(): void {
     try {
       this.socket.close();
+      return;
     } catch (error) {
       console.log(error);
     }

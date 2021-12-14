@@ -35,6 +35,7 @@ export default {
     },
   },
   computed: {
+    // allow to use v-model on component
     Ivalue: {
       get() {
         return this.value;

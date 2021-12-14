@@ -9,9 +9,10 @@
           <span
             class="badge rounded-pill"
             :class="status ? 'bg-primary' : 'bg-danger'"
-            >{{ status ? "Connected" : "Disconnected" }}</span
+            >{{ status ? "Connected" : "Disconnecting" }}</span
           >
         </h1>
+
 
         <div class="d-flex justify-content-end gap-4">
           <button
@@ -19,16 +20,19 @@
             @click="stopSocket"
             :disabled="!status"
           >
-            Stop cars
+            Stop Vehicles
           </button>
         </div>
 
         <div class="d-flex justify-content-end my-5">
-          <BaseSelect v-model="select" :items="['all', 'warsaw', 'opole']" />
+          <div>
+            <p class="mb-2 fs-5">Filter by: Group</p>
+            <BaseSelect v-model="select" :items="['all', 'warsaw', 'opole']" />
+          </div>
         </div>
 
-        <div class="container fixed">
-          <div class="row g-2 mt-5 row-cols-3">
+        <div class="container fixed shadow">
+          <div class="row g-2 mt-5 row-cols-3" v-if="computedData.length > 0">
             <div
               class="col"
               v-for="(items, index) in computedData"
@@ -41,12 +45,19 @@
                   <Battery :percent="items.battery_status.percentage_level" />
                 </div>
                 <div class="card-body text-center">
-                  <span class="circle"> </span>
-
+                  <img src="./assets/cars.jpg" class="img-rounded img-fluid" />
                   <h5 class="mt-3">{{ items.name }}</h5>
                 </div>
               </div>
             </div>
+          </div>
+          <div v-else class="d-flex justify-content-center align-items-center">
+            <h1 v-if="select != ''" class="text-capitalise text-muted">
+              Unable to find vehicles by : {{ select }}
+            </h1>
+            <h1 class="text-muted" v-else>
+              Oops, Vehicles list is empty, Please connect to the server
+            </h1>
           </div>
         </div>
       </div>
@@ -69,9 +80,9 @@ export default defineComponent({
   data() {
     return {
       select: "" as string,
-      message: "Hello World" as string,
       status: false as boolean,
       content: [] as vehicleDto[],
+      message: { name: "vehicle/view/rentable/subscribe" } as any,
     };
   },
 
@@ -88,7 +99,7 @@ export default defineComponent({
 
   methods: {
     startSocket() {
-      SocketService.sendData({ name: "vehicle/view/rentable/subscribe" });
+      SocketService.sendData(this.message);
     },
     stopSocket() {
       SocketService.close();
@@ -143,6 +154,11 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.img-rounded {
+  border-radius: 50%;
+  height: 5rem;
+  width: 5rem;
+}
 .fixed {
   width: 200rem !important;
   height: 30rem;

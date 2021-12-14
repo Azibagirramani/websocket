@@ -25,6 +25,8 @@ export default {
   },
 
   computed: {
+
+    // set the color of the battery based on the percentage
     batteryColor() {
       if (this.percent >= 50) {
         return "green";
