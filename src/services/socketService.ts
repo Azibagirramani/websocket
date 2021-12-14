@@ -20,15 +20,12 @@ export interface vehicle {
   _change: string;
 }
 
-
-
-
 /**
  * Socket Service
  * @export
  * @class SocketService
  * @extends {BaseService}
- * 
+ *
  */
 
 class SocketService {
@@ -72,6 +69,13 @@ class SocketService {
   public isOffline(callback: any): void {
     const state = this.socket.readyState === WebSocket.CLOSED;
     callback(state);
+  }
+
+  // reconnect
+  public onError(callback: any): void {
+    this.socket.onerror = () => {
+      callback();
+    };
   }
 
   // close connection

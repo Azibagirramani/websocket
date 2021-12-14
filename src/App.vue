@@ -13,25 +13,25 @@
           >
         </h1>
 
-        <div
-          class="d-flex justify-content-end flex-column d-inline inline gap-2 w-25"
-        >
+        <div class="d-flex justify-content-end gap-4">
           <button
             class="btn btn-primary rounded-0 shadow border-0"
             @click="startSocket"
+            :disabled="!status"
           >
-            Start
+            Show cars
           </button>
-          <button
+           <button
             class="btn btn-danger rounded-0 shadow border-0"
-            @click="closeSocket"
+            @click="stopSocket"
+            :disabled="!status"
           >
-            Stop
+            Stop cars
           </button>
         </div>
 
-        <div class="d-flex justify-content-end d-inline my-5">
-          <BaseSelect v-model="select" />
+        <div class="d-flex justify-content-end my-5">
+          <BaseSelect v-model="select" :items="['all', 'warsaw', 'opole']" />
         </div>
 
         <div class="container fixed">
@@ -83,31 +83,30 @@ export default defineComponent({
   },
 
   computed: {
-    // searhc for the vehicle
     computedData() {
       const data = this.content as vehicleDto[];
       const search = this.select as string;
       if (search) {
-        return data.filter((item) => item.name.includes(search));
+        return data.filter((item) => item.group.includes(search));
       }
       return data;
     },
   },
 
   methods: {
-    // filter the data
-    filterData(data: vehicleDto[]) {
-      return data.filter((item) => {
-        return item.name.toLowerCase().includes(this.select.toLowerCase());
-      });
-    },
-
     startSocket() {
       SocketService.sendData({ name: "vehicle/view/rentable/subscribe" });
     },
-
-    closeSocket() {
+    stopSocket() {
       SocketService.close();
+    },
+  },
+
+  watch: {
+    select(value: string) {
+      if (value === "all") {
+        this.select = "";
+      }
     },
   },
 

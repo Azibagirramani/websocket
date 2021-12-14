@@ -1,11 +1,11 @@
 <template>
   <select
-    class="form-select form-select-sm"
+    class="form-select form-select-sm shadow wb-2 text-capitalize"
     aria-label=".form-select-sm example"
+    v-model="Ivalue"
   >
-    <option selected>Open this select menu</option>
-    <option v-for="(option, index) in options" :value="option" :key="index">
-      {{ option }}
+    <option v-for="(value, index) in items" :value="value" :key="index">
+      {{ value }}
     </option>
   </select>
 </template>
@@ -17,30 +17,39 @@ export default {
       type: String,
       default: "",
     },
-    options: {
-      type: Array,
-      default: () => [],
+    label: {
+      type: String,
+      required: false,
+      default: "",
     },
     placeholder: {
       type: String,
-      default: "",
+      required: false,
     },
-    disabled: {
-      type: Boolean,
-      default: false,
+    items: {
+      type: Array,
+      required: false,
+      default() {
+        return [];
+      },
     },
   },
   computed: {
-    selectOptions() {
-      return this.options.map((option) => {
-        return {
-          value: option.value,
-          text: option.text,
-        };
-      });
+    Ivalue: {
+      get() {
+        return this.value;
+      },
+      set(value) {
+        this.$emit("input", value);
+      },
     },
   },
 };
 </script>
 
-<style></style>
+<style lang="scss" scoped>
+.wb-2 {
+  width: 10rem !important;
+  height: 3rem !important;
+}
+</style>
